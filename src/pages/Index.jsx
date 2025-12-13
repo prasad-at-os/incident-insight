@@ -10,8 +10,8 @@ import { Toaster } from 'sonner';
 
 export default function Index() {
   const [filters, setFilters] = useState({
-    state: 'all',
-    severity: 'all',
+    state: 'open,in progress',
+    severity: undefined,
     owner: '',
     search: '',
     limit: 10,
@@ -72,9 +72,9 @@ export default function Index() {
         {/* Stats Summary */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'Critical', count: tickets.filter(t => t.severity === 'critical').length, color: 'text-severity-critical' },
+            { label: 'Sev1', count: tickets.filter(t => t.severity === 'sev1').length, color: 'text-severity-critical' },
             { label: 'Open', count: tickets.filter(t => t.state === 'open').length, color: 'text-state-open' },
-            { label: 'Investigating', count: tickets.filter(t => t.state === 'investigating').length, color: 'text-state-investigating' },
+            { label: 'In Progress', count: tickets.filter(t => t.state === 'in progress').length, color: 'text-state-investigating' },
             { label: 'Total', count: total, color: 'text-foreground' },
           ].map((stat) => (
             <div key={stat.label} className="p-4 bg-card rounded-lg border border-border">

@@ -1,66 +1,121 @@
 import { useState } from 'react';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 
 const states = [
-  { value: 'all', label: 'All States' },
   { value: 'open', label: 'Open' },
-  { value: 'investigating', label: 'Investigating' },
-  { value: 'resolved', label: 'Resolved' },
   { value: 'closed', label: 'Closed' },
+  { value: 'in progress', label: 'In Progress' },
 ];
 
 const severities = [
-  { value: 'all', label: 'All Severities' },
-  { value: 'critical', label: 'Critical' },
-  { value: 'high', label: 'High' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'low', label: 'Low' },
+  { value: 'sev1', label: 'Sev1' },
+  { value: 'sev2', label: 'Sev2' },
+  { value: 'sev3', label: 'Sev3' },
+  { value: 'sev4', label: 'Sev4' },
 ];
 
 export function FilterBar({ filters, onChange, className }) {
   const [localFilters, setLocalFilters] = useState({
-    state: filters.state || 'all',
-    severity: filters.severity || 'all',
+    state: filters.state || ['open', 'in progress'],
+    severity: filters.severity || [],
     owner: filters.owner || '',
     search: filters.search || '',
   });
 
   const activeFilterCount = [
-    localFilters.state !== 'all',
-    localFilters.severity !== 'all',
+    Array.isArray(localFilters.state) && localFilters.state.length > 0,
+    Array.isArray(localFilters.severity) && localFilters.severity.length > 0,
     localFilters.owner.length > 0,
     localFilters.search.length > 0,
   ].filter(Boolean).length;
 
   const handleApply = () => {
-    onChange(localFilters);
+    // Convert arrays to comma-separated strings for API
+    const apiFilters = {
+      ...localFilters,
+      state: Array.isArray(localFilters.state) && localFilters.state.length > 0
+        ? localFilters.state.join(',')
+        : undefined,
+      severity: Array.isArray(localFilters.severity) && localFilters.severity.length > 0
+        ? localFilters.severity.join(',')
+        : undefined,
+    };
+    onChange(apiFilters);
   };
 
   const handleClear = () => {
     const cleared = {
-      state: 'all',
-      severity: 'all',
+      state: [],
+      severity: [],
       owner: '',
       search: '',
     };
     setLocalFilters(cleared);
-    onChange(cleared);
+    onChange({
+      state: undefined,
+      severity: undefined,
+      owner: '',
+      search: '',
+    });
   };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleApply();
     }
+  };
+
+  const toggleState = (value) => {
+    const newStates = localFilters.state.includes(value)
+      ? localFilters.state.filter(s => s !== value)
+      : [...localFilters.state, value];
+    setLocalFilters({ ...localFilters, state: newStates });
+  };
+
+  const toggleSeverity = (value) => {
+    const newSeverities = localFilters.severity.includes(value)
+      ? localFilters.severity.filter(s => s !== value)
+      : [...localFilters.severity, value];
+    setLocalFilters({ ...localFilters, severity: newSeverities });
+  };
+
+  const getStateLabel = () => {
+    if (!Array.isArray(localFilters.state) || localFilters.state.length === 0) {
+      return 'All States';
+    }
+    if (localFilters.state.length === states.length) {
+      return 'All States';
+    }
+    if (localFilters.state.length === 1) {
+      return states.find(s => s.value === localFilters.state[0])?.label || 'States';
+    }
+    // Show comma-separated list for multiple selections
+    return localFilters.state
+      .map(val => states.find(s => s.value === val)?.label)
+      .filter(Boolean)
+      .join(', ');
+  };
+
+  const getSeverityLabel = () => {
+    if (!Array.isArray(localFilters.severity) || localFilters.severity.length === 0) {
+      return 'All Severities';
+    }
+    if (localFilters.severity.length === severities.length) {
+      return 'All Severities';
+    }
+    if (localFilters.severity.length === 1) {
+      return severities.find(s => s.value === localFilters.severity[0])?.label || 'Severities';
+    }
+    // Show comma-separated list for multiple selections
+    return localFilters.severity
+      .map(val => severities.find(s => s.value === val)?.label)
+      .filter(Boolean)
+      .join(', ');
   };
 
   return (
@@ -78,39 +133,69 @@ export function FilterBar({ filters, onChange, className }) {
           />
         </div>
 
-        {/* State Filter */}
-        <Select
-          value={localFilters.state}
-          onValueChange={(value) => setLocalFilters({ ...localFilters, state: value })}
-        >
-          <SelectTrigger className="w-[150px] bg-secondary border-border">
-            <SelectValue placeholder="State" />
-          </SelectTrigger>
-          <SelectContent className="bg-popover border-border">
-            {states.map((state) => (
-              <SelectItem key={state.value} value={state.value}>
-                {state.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* State Filter - Multi-select */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-[150px] justify-between bg-secondary border-border"
+            >
+              <span className="truncate">{getStateLabel()}</span>
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[200px] p-2 bg-popover border-border">
+            <div className="space-y-2">
+              {states.map((state) => (
+                <div
+                  key={state.value}
+                  className="flex items-center space-x-2 p-2 rounded hover:bg-accent cursor-pointer"
+                  onClick={() => toggleState(state.value)}
+                >
+                  <Checkbox
+                    checked={localFilters.state.includes(state.value)}
+                    onCheckedChange={() => toggleState(state.value)}
+                  />
+                  <label className="flex-1 text-sm cursor-pointer">
+                    {state.label}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
 
-        {/* Severity Filter */}
-        <Select
-          value={localFilters.severity}
-          onValueChange={(value) => setLocalFilters({ ...localFilters, severity: value })}
-        >
-          <SelectTrigger className="w-[160px] bg-secondary border-border">
-            <SelectValue placeholder="Severity" />
-          </SelectTrigger>
-          <SelectContent className="bg-popover border-border">
-            {severities.map((severity) => (
-              <SelectItem key={severity.value} value={severity.value}>
-                {severity.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Severity Filter - Multi-select */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-[160px] justify-between bg-secondary border-border"
+            >
+              <span className="truncate">{getSeverityLabel()}</span>
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[200px] p-2 bg-popover border-border">
+            <div className="space-y-2">
+              {severities.map((severity) => (
+                <div
+                  key={severity.value}
+                  className="flex items-center space-x-2 p-2 rounded hover:bg-accent cursor-pointer"
+                  onClick={() => toggleSeverity(severity.value)}
+                >
+                  <Checkbox
+                    checked={localFilters.severity.includes(severity.value)}
+                    onCheckedChange={() => toggleSeverity(severity.value)}
+                  />
+                  <label className="flex-1 text-sm cursor-pointer">
+                    {severity.label}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
 
         {/* Owner Filter */}
         <Input
@@ -137,7 +222,7 @@ export function FilterBar({ filters, onChange, className }) {
               </span>
             )}
           </Button>
-          
+
           {activeFilterCount > 0 && (
             <Button
               variant="ghost"

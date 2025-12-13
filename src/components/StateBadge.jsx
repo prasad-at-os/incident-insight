@@ -4,28 +4,26 @@ const stateConfig = {
   open: {
     bg: "bg-state-open/20",
     text: "text-state-open",
-    border: "border-state-open/30"
-  },
-  investigating: {
-    bg: "bg-state-investigating/20",
-    text: "text-state-investigating",
-    border: "border-state-investigating/30"
-  },
-  resolved: {
-    bg: "bg-state-resolved/20",
-    text: "text-state-resolved",
-    border: "border-state-resolved/30"
+    border: "border-state-open/30",
+    label: "Open"
   },
   closed: {
     bg: "bg-state-closed/20",
     text: "text-state-closed",
-    border: "border-state-closed/30"
+    border: "border-state-closed/30",
+    label: "Closed"
+  },
+  "in progress": {
+    bg: "bg-state-investigating/20",
+    text: "text-state-investigating",
+    border: "border-state-investigating/30",
+    label: "In Progress"
   }
 };
 
 export function StateBadge({ state, className }) {
-  const config = stateConfig[state] || stateConfig.closed;
-  
+  const config = stateConfig[state] || stateConfig.open;
+
   return (
     <span
       className={cn(
@@ -36,7 +34,7 @@ export function StateBadge({ state, className }) {
         className
       )}
     >
-      {state.charAt(0).toUpperCase() + state.slice(1)}
+      {config.label}
     </span>
   );
 }

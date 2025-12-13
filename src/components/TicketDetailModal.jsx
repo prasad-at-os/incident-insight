@@ -1,20 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { X, ExternalLink, RefreshCw, Save, Clock, User } from 'lucide-react';
+import { X, ExternalLink, RefreshCw, Clock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { SeverityBadge } from './SeverityBadge';
 import { StateBadge } from './StateBadge';
 import { TagList } from './TagBadge';
 import { MarkdownSection } from './MarkdownSection';
 import { ResizableDivider } from './ResizableDivider';
 import { useTicketDetail } from '../hooks/useTicketDetail';
-import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 function formatAge(minutes) {
@@ -24,13 +16,9 @@ function formatAge(minutes) {
 }
 
 export function TicketDetailModal({ ticketId, onClose }) {
-  const { ticket, fldContent, loading, fldLoading, error, updating, update, refetch } = useTicketDetail(ticketId);
+  const { ticket, fldContent, loading, fldLoading, error, refetch } = useTicketDetail(ticketId);
   const [topHeight, setTopHeight] = useState(40);
-  const [editedState, setEditedState] = useState(null);
-  const [editedSeverity, setEditedSeverity] = useState(null);
   const containerRef = useRef(null);
-
-  const hasChanges = editedState !== null || editedSeverity !== null;
 
   useEffect(() => {
     const handleEscape = (e) => {
@@ -62,24 +50,6 @@ export function TicketDetailModal({ ticketId, onClose }) {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   }, [topHeight]);
-
-  const handleSave = async () => {
-    const updates = {};
-    if (editedState !== null) updates.state = editedState;
-    if (editedSeverity !== null) updates.severity = editedSeverity;
-
-    const result = await update(updates);
-    if (result?.success) {
-      toast.success('Ticket updated successfully');
-      setEditedState(null);
-      setEditedSeverity(null);
-    } else {
-      toast.error('Failed to update ticket');
-    }
-  };
-
-  const currentState = editedState ?? ticket?.state;
-  const currentSeverity = editedSeverity ?? ticket?.severity;
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -151,42 +121,16 @@ export function TicketDetailModal({ ticketId, onClose }) {
         {!loading && ticket && (
           <div className="px-6 py-4 border-b border-border bg-secondary/30">
             <div className="flex flex-wrap items-center gap-4">
-              {/* State Selector */}
+              {/* State Badge */}
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">State:</span>
-                <Select
-                  value={currentState}
-                  onValueChange={(value) => setEditedState(value)}
-                >
-                  <SelectTrigger className="w-[140px] h-8 bg-secondary border-border">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    <SelectItem value="open">Open</SelectItem>
-                    <SelectItem value="investigating">Investigating</SelectItem>
-                    <SelectItem value="resolved">Resolved</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                  </SelectContent>
-                </Select>
+                <StateBadge state={ticket.state} />
               </div>
 
-              {/* Severity Selector */}
+              {/* Severity Badge */}
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Severity:</span>
-                <Select
-                  value={currentSeverity}
-                  onValueChange={(value) => setEditedSeverity(value)}
-                >
-                  <SelectTrigger className="w-[130px] h-8 bg-secondary border-border">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border">
-                    <SelectItem value="critical">Critical</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                  </SelectContent>
-                </Select>
+                <SeverityBadge severity={ticket.severity} />
               </div>
 
               {/* Owner */}
@@ -207,19 +151,6 @@ export function TicketDetailModal({ ticketId, onClose }) {
 
               {/* Tags */}
               <TagList tags={ticket.tags} maxVisible={4} />
-
-              {/* Save Button */}
-              {hasChanges && (
-                <Button
-                  size="sm"
-                  onClick={handleSave}
-                  disabled={updating}
-                  className="ml-auto gap-2"
-                >
-                  <Save className="h-4 w-4" />
-                  {updating ? 'Saving...' : 'Save Changes'}
-                </Button>
-              )}
             </div>
           </div>
         )}
