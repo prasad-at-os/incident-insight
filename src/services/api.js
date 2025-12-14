@@ -1,7 +1,7 @@
 // API service for On-Call Debugger Dashboard
 // Connects to backend API at http://localhost:3000/api
 
-export const API_BASE_URL = 'http://148.251.11.184:3000/api';
+export const API_BASE_URL = 'https://cors-anywhere.herokuapp.com/http://148.251.11.184:3000/api';
 
 /**
  * Fetch tickets with optional filters
