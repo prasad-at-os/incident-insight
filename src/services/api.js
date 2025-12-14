@@ -32,7 +32,9 @@ export async function fetchTickets(filters = {}) {
     const url = `${API_BASE_URL}/tickets${params.toString() ? '?' + params.toString() : ''}`;
     const response = await fetch(url, {
       headers: {
-        'ngrok-skip-browser-warning': 'true'
+        'ngrok-skip-browser-warning': 'true',
+        'x-requested-with': 'XMLHttpRequest',
+        'origin': 'https://lambent-swan-802fb2.netlify.app'
       }
     });
 
@@ -74,7 +76,9 @@ export async function fetchTicketDetail(ticketId) {
   try {
     const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}`, {
       headers: {
-        'ngrok-skip-browser-warning': 'true'
+        'ngrok-skip-browser-warning': 'true',
+        'x-requested-with': 'XMLHttpRequest',
+        'origin': 'https://lambent-swan-802fb2.netlify.app'
       }
     });
 
@@ -106,7 +110,9 @@ export async function fetchFLD(ticketId) {
   try {
     const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}/fld`, {
       headers: {
-        'ngrok-skip-browser-warning': 'true'
+        'ngrok-skip-browser-warning': 'true',
+        'x-requested-with': 'XMLHttpRequest',
+        'origin': 'https://lambent-swan-802fb2.netlify.app'
       }
     });
 
@@ -148,7 +154,9 @@ export async function updateTicket(ticketId, updates) {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
+        'ngrok-skip-browser-warning': 'true',
+        'x-requested-with': 'XMLHttpRequest',
+        'origin': 'https://lambent-swan-802fb2.netlify.app'
       },
       body: JSON.stringify(updates)
     });
