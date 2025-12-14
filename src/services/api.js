@@ -1,7 +1,7 @@
 // API service for On-Call Debugger Dashboard
 // Connects to backend API at http://localhost:3000/api
 
-const API_BASE_URL = 'http://localhost:3000/api';
+export const API_BASE_URL = 'http://148.251.11.184:3000/api';
 
 /**
  * Fetch tickets with optional filters
@@ -30,7 +30,11 @@ export async function fetchTickets(filters = {}) {
     }
 
     const url = `${API_BASE_URL}/tickets${params.toString() ? '?' + params.toString() : ''}`;
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -68,7 +72,11 @@ export async function fetchTickets(filters = {}) {
  */
 export async function fetchTicketDetail(ticketId) {
   try {
-    const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}`);
+    const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}`, {
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
+    });
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -96,7 +104,11 @@ export async function fetchTicketDetail(ticketId) {
  */
 export async function fetchFLD(ticketId) {
   try {
-    const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}/fld`);
+    const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}/fld`, {
+      headers: {
+        'ngrok-skip-browser-warning': 'true'
+      }
+    });
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -135,7 +147,8 @@ export async function updateTicket(ticketId, updates) {
     const response = await fetch(`${API_BASE_URL}/tickets/${ticketId}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
       },
       body: JSON.stringify(updates)
     });

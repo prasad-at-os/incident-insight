@@ -124,9 +124,6 @@ export function TicketTable({ tickets, loading, onTicketClick, className }) {
             <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Tags
             </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              OTRS
-            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -174,21 +171,6 @@ export function TicketTable({ tickets, loading, onTicketClick, className }) {
               </td>
               <td className="px-4 py-4">
                 <TagList tags={ticket.tags} maxVisible={2} />
-              </td>
-              <td className="px-4 py-4">
-                {ticket.otrs_url ? (
-                  <a
-                    href={ticket.otrs_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                ) : (
-                  <span className="text-muted-foreground">—</span>
-                )}
               </td>
             </tr>
           ))}
